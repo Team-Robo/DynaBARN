@@ -172,7 +172,7 @@ if __name__ == "__main__":
     import os
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--save_dir', type=str, default="/worlds")
+    parser.add_argument('--save_dir', type=str, default="worlds")
     parser.add_argument('--seed', type=int, default=11)
     parser.add_argument('--min_object', type=int, default=2)
     parser.add_argument('--max_object', type=int, default=6)
@@ -188,12 +188,18 @@ if __name__ == "__main__":
     parser.add_argument('--plugins_dir', type=str, default="plugins")
     args = parser.parse_args()
     np.random.seed(args.seed)
+    random.seed(args.seed)
 
-    # # 1 build plugins
     plugins_dir = args.plugins_dir
+    build_dir = os.path.join(plugins_dir, "build")
+    save_dir = args.save_dir
+
+    os.makedirs(plugins_dir, exist_ok=True)
+    os.makedirs(build_dir, exist_ok=True)
+    os.makedirs(save_dir, exist_ok=True)
+    
+    # # 1 build plugins
     # if args.rebuild_plugin or not os.path.exists(plugins_dir):
-    np.random.seed(args.seed)
-    # os.mkdir(plugins_dir)
     name_list = []
     for i in range(200):
         name = 'obs_' + str(i)
@@ -212,12 +218,17 @@ if __name__ == "__main__":
     with open(os.path.join(plugins_dir, "CMakeLists.txt"), "w") as f:
         f.writelines(cmake_fs)
 
-    os.mkdir(os.path.join(plugins_dir, "build"))
-
     wd = os.getcwd()
-    os.chdir(os.path.join(wd, plugins_dir, "build"))
-    subprocess.run(["cmake", ".."])
-    subprocess.call("make")
+    os.chdir(build_dir)
+    
+    if subprocess.run(["cmake", ".."]).returncode != 0:
+        print("Error: CMake Failed.")
+        exit(1)
+
+    if subprocess.call("make") != 0:
+        print("Error: Make Failed.")
+        exit(1)
+
     os.chdir(wd)
     # 2 create .world files
     np.random.seed(args.seed + 1)
