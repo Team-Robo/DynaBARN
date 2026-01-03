@@ -68,7 +68,7 @@ project(animated_box)\n\
 \n\
 find_package(gazebo REQUIRED)\n\
 \n\
-list(APPEND CMAKE_CXX_FLAGS '${GAZEBO_CXX_FLAGS}')\n\
+set(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}\")\n\
 \n\
 # include appropriate directories\n\
 include_directories(${GAZEBO_INCLUDE_DIRS})\n\
